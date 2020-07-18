@@ -81,11 +81,11 @@ const addEdgeClick = () => {
 const createRandom = () => {
   const n = parseInt(document.getElementById("nodes").value, 10);
   document.getElementById("nodes").value = "";
-  for (let i = 0; i < n; i++) addNode(i, map, nodes);
-  let j = 0;
-  while (j < 2 * n) {
-    let a = Math.floor(Math.random() * (n - 1 - 0 + 1)) + 0;
-    let b = Math.floor(Math.random() * (n - 1 - 0 + 1)) + 0;
+  for (let i = 1; i <= n; i++) addNode(i, map, nodes);
+  let j = 1;
+  while (j <= n + 2) {
+    let a = Math.floor(Math.random() * (n - 1 + 1)) + 1;
+    let b = Math.floor(Math.random() * (n - 1 + 1)) + 1;
     let val = Math.floor(Math.random() * 10 + 10) * 100;
     if (a == b) continue;
     addEdge(a, b, val, map, edges);
