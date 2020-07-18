@@ -14,17 +14,12 @@ for(let i = 0;i<from.length;i++){
     edges.push({from:from[i],to:to[i],label:"55"})
 }
 
+
+// load graphs
 const loadGraph = (N,E)=>{
-    // create an array with nodes
     var nodes = new vis.DataSet(N);
-
-    // create an array with edges
     var edges = new vis.DataSet(E);
-
-    // create a network
     var container = document.getElementById('mynetwork');
-
-    // provide the data in the vis format
     var data = {
         nodes: nodes,
         edges: edges
@@ -34,11 +29,27 @@ const loadGraph = (N,E)=>{
             arrows:{to:true}
         }
     };
-
-    // initialize your network!
     var network = new vis.Network(container, data, options);
 }
 
+const loadSimplifiedGraph = (N,E)=>{
+    var nodes = new vis.DataSet(N);
+    var edges = new vis.DataSet(E);
+    var container = document.getElementById('mynetwork2');
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {
+        edges:{
+            arrows:{to:true}
+        }
+    };
+    var network = new vis.Network(container, data, options);
+}
+
+
+// utils
 const addNode=(node,map,nodes)=>{
     if(!map.has(node)){
         nodes.push({id:node,label:"Node "+node})
@@ -70,54 +81,30 @@ const addEdgeClick = () =>{
 }
 
 
-
-const loadGraph2 = (N,E)=>{
-    // create an array with nodes
-    var nodes = new vis.DataSet(N);
-
-    // create an array with edges
-    var edges = new vis.DataSet(E);
-
-    // create a network
-    var container = document.getElementById('mynetwork2');
-
-    // provide the data in the vis format
-    var data = {
-        nodes: nodes,
-        edges: edges
-    };
-    var options = {
-        edges:{
-            arrows:{to:true}
+// cash flow minimization
+const simplify = () =>{
+    const minCashFlow = () =>{
+        let amount = []
+        for(let i = 0;i<=nodes.length;i++){
+            amount.push(0)
         }
-    };
-
-    // initialize your network!
-    var network = new vis.Network(container, data, options);
-}
-
-const minCashFlow = () =>{
-    let amount = []
-    for(let i = 0;i<=nodes.length;i++){
-        amount.push(0)
+        for(let i = 0;i<edges.length;i++){
+            amount[edges[i].from] -= parseInt(edges[i].label,10)
+            amount[edges[i].to] += parseInt(edges[i].label,10)
+        }
+        amount.shift()
+        let mxCredit = amount.indexOf(Math.max(...amount))
+        let mxDebit = amount.indexOf(Math.min(...amount))
+        let newEdges = []
+        while(!amount[mxCredit] == 0 && !amount[mxDebit] == 0){
+            const min = Math.min(-amount[mxDebit], amount[mxCredit]); 
+            amount[mxCredit] -= min; 
+            amount[mxDebit] += min;
+            newEdges.push({from:mxDebit+1,to:mxCredit+1,label:min.toString()})
+            mxCredit = amount.indexOf(Math.max(...amount))
+            mxDebit = amount.indexOf(Math.min(...amount))
+        }
+        loadSimplifiedGraph(nodes,newEdges)
     }
-    for(let i = 0;i<edges.length;i++){
-        amount[edges[i].from] -= parseInt(edges[i].label,10)
-        amount[edges[i].to] += parseInt(edges[i].label,10)
-    }
-    amount.shift()
-    let mxCredit = amount.indexOf(Math.max(...amount))
-    let mxDebit = amount.indexOf(Math.min(...amount))
-    let newEdges = []
-    while(!amount[mxCredit] == 0 && !amount[mxDebit] == 0){
-        const min = Math.min(-amount[mxDebit], amount[mxCredit]); 
-		amount[mxCredit] -= min; 
-        amount[mxDebit] += min;
-        newEdges.push({from:mxDebit+1,to:mxCredit+1,label:min.toString()})
-        mxCredit = amount.indexOf(Math.max(...amount))
-        mxDebit = amount.indexOf(Math.min(...amount))
-    }
-    console.log(newEdges)
-    console.log(amount)
-    loadGraph2(nodes,newEdges)
+    minCashFlow()
 }
